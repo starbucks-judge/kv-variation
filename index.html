@@ -728,7 +728,17 @@ function renderPresetList(){
   el.querySelectorAll('[data-check]').forEach(cb=>{
     cb.addEventListener('change', ()=>{
       const id = cb.dataset.check;
-      if (cb.checked) selectedPresetIds.add(id); else selectedPresetIds.delete(id);
+      if (cb.checked){
+        selectedPresetIds.add(id);
+      } else {
+        selectedPresetIds.delete(id);
+        // 체크 해제 시 fabric 인스턴스를 완전히 정리해서, 다시 체크했을 때
+        // 깨끗한 상태로 재생성되도록 한다 (메모리 누수 및 좀비 인스턴스 방지)
+        if (canvases[id]){
+          canvases[id].fc.dispose();
+          delete canvases[id];
+        }
+      }
       renderCanvasTabs();
     });
   });
@@ -873,23 +883,49 @@ function renderAllCanvasStages(){
   const list = presets.filter(p=>selectedPresetIds.has(p.id));
   if (!list.length){ renderEmptyCenter(); return; }
 
-  wrap.innerHTML = list.map(p => {
-    const disp = getDisplayDims(p);
-    return `
-      <div class="canvas-page" data-preset="${p.id}" style="display:${p.id===activePresetId?'flex':'none'}; flex-direction:column; align-items:center; gap:10px;">
-        <div class="canvas-label">${p.name} · ${p.w}×${p.h}mm</div>
-        <div class="canvas-shadow" style="width:${disp.w}px; height:${disp.h}px;">
-          <canvas id="fc-${p.id}" width="${disp.w}" height="${disp.h}"></canvas>
-        </div>
-      </div>
-    `;
-  }).join('');
+  // 이미 만들어진 캔버스 페이지는 절대 innerHTML로 재생성하지 않는다.
+  // (fabric.Canvas 인스턴스가 살아있는 DOM을 계속 참조해야 하므로, 통째로 다시 그리면
+  //  기존 인스턴스가 이미 사라진 <canvas> 엘리먼트를 가리키게 되어 화면이 멈춰버린다.)
+  const existingIds = new Set(Array.from(wrap.querySelectorAll('.canvas-page')).map(el=>el.dataset.preset));
 
-  list.forEach(p=>{
-    if (!canvases[p.id]){
-      initFabricCanvas(p);
+  // 더 이상 선택되지 않은 프리셋의 페이지는 제거
+  existingIds.forEach(id=>{
+    if (!list.find(p=>p.id===id)){
+      const el = wrap.querySelector(`.canvas-page[data-preset="${id}"]`);
+      if (el) el.remove();
+      if (canvases[id]){
+        canvases[id].fc.dispose();
+        delete canvases[id];
+      }
     }
   });
+
+  // 새로 추가된 프리셋만 DOM에 append
+  list.forEach(p=>{
+    if (existingIds.has(p.id)) return;
+    const disp = getDisplayDims(p);
+    const pageEl = document.createElement('div');
+    pageEl.className = 'canvas-page';
+    pageEl.dataset.preset = p.id;
+    pageEl.style.display = 'none';
+    pageEl.style.flexDirection = 'column';
+    pageEl.style.alignItems = 'center';
+    pageEl.style.gap = '10px';
+    pageEl.innerHTML = `
+      <div class="canvas-label">${p.name} · ${p.w}×${p.h}mm</div>
+      <div class="canvas-shadow" style="width:${disp.w}px; height:${disp.h}px;">
+        <canvas id="fc-${p.id}" width="${disp.w}" height="${disp.h}"></canvas>
+      </div>
+    `;
+    wrap.appendChild(pageEl);
+    initFabricCanvas(p);
+  });
+
+  // 표시 상태 갱신: activePresetId만 보이게
+  wrap.querySelectorAll('.canvas-page').forEach(el=>{
+    el.style.display = (el.dataset.preset === activePresetId) ? 'flex' : 'none';
+  });
+
   renderRightPanel();
 }
 
