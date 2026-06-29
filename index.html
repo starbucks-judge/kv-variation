@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Planbag KV Variation — 키비주얼 베리에이션 툴</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fabric@5.5.2/dist/fabric.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
 <style>
@@ -953,7 +953,7 @@ function applyLayoutTemplate(presetId){
       left: disp.w*0.06, top: disp.h - barH + barH*0.16,
       width: disp.w*0.88,
       fontSize: Math.max(14, disp.h*0.045),
-      fontWeight:'700', fill:'#fff', fontFamily,
+      fontWeight:'700', fill:'#ffffff', fontFamily,
       textAlign:'left',
     });
     const sub = new fabric.Textbox(buildSubLine(), {
@@ -983,7 +983,7 @@ function applyLayoutTemplate(presetId){
       left: disp.w - barW + barW*0.1, top: disp.h*0.30,
       width: barW*0.8,
       fontSize: Math.max(14, disp.h*0.06),
-      fontWeight:'700', fill:'#fff', fontFamily,
+      fontWeight:'700', fill:'#ffffff', fontFamily,
       textAlign:'left',
     });
     const sub = new fabric.Textbox(buildSubLine('\n'), {
@@ -1004,7 +1004,7 @@ function applyLayoutTemplate(presetId){
       left: disp.w*0.06, top: disp.h*0.05,
       width: disp.w*0.88,
       fontSize: Math.max(14, disp.h*0.05),
-      fontWeight:'800', fill:'#fff', fontFamily,
+      fontWeight:'800', fill:'#ffffff', fontFamily,
       textAlign:'center',
       stroke:'rgba(0,0,0,0.35)', strokeWidth:1,
     });
@@ -1012,7 +1012,7 @@ function applyLayoutTemplate(presetId){
       left: disp.w*0.06, top: disp.h*0.05 + Math.max(14, disp.h*0.05) + 8,
       width: disp.w*0.88,
       fontSize: Math.max(10, disp.h*0.026),
-      fontWeight:'600', fill:'#fff', fontFamily,
+      fontWeight:'600', fill:'#ffffff', fontFamily,
       textAlign:'center',
     });
     fc.add(title); fc.add(sub);
